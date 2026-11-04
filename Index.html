@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Worditoo – Play and learn English</title>
+<style>
+:root{--ink:#28193d;--bg:#4b3e68;--yel:#ffdb4d;--f:"Fredoka","Nunito",ui-rounded,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:#fff;font-family:var(--f)}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+button:focus-visible{outline:3px solid #fff;outline-offset:2px}
+#app{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;overflow:hidden}
+.st{color:#fff;font-weight:900;letter-spacing:1px;text-shadow:-2px -2px 0 #28193d,2px -2px 0 #28193d,-2px 2px 0 #28193d,2px 2px 0 #28193d,0 4px 0 #28193d,0 6px 10px rgba(0,0,0,.3)}
+.art{filter:drop-shadow(3px 0 0 #28193d) drop-shadow(-3px 0 0 #28193d) drop-shadow(0 3px 0 #28193d) drop-shadow(0 -3px 0 #28193d);line-height:1}
+/* home */
+.home{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:16px}
+.home svg{width:130px;height:130px}
+.logo{font-size:clamp(46px,13vw,82px);line-height:.9}
+.sub{font-size:24px;font-weight:700}
+.tag{font-size:16px;font-weight:700;color:var(--yel);margin-bottom:12px}
+.pills{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:22px}
+.pill{background:rgba(0,0,0,.28);border:3px solid var(--ink);border-radius:999px 90px 999px 80px;padding:9px 18px;font-weight:700;font-size:15px;box-shadow:0 4px 0 var(--ink)}
+.play{background:var(--yel);color:var(--ink);font-size:34px;font-weight:700;padding:12px 56px;border:4px solid var(--ink);border-radius:30px 24px 32px 22px;box-shadow:0 7px 0 var(--ink)}
+.pill:active,.play:active{transform:translateY(3px)}
+/* game */
+.game{position:absolute;inset:0;display:flex;flex-direction:column;color:var(--ink);transition:background .25s}
+.game.ok{background:#b9f6ca!important}.game.no{background:#ff8a80!important}
+.badge,.sb{width:58px;height:58px;border-radius:48% 52% 50% 50%;background:var(--yel);border:4px solid var(--ink);color:var(--ink);font-weight:700;font-size:15px;line-height:1;display:grid;place-items:center;box-shadow:0 4px 0 var(--ink)}
+.hud{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:12px;right:12px;display:flex;justify-content:space-between;align-items:flex-start;z-index:30;pointer-events:none}
+.hud>*{pointer-events:auto}
+.sc{text-align:right;font-weight:900;line-height:1;color:var(--ink)}
+.sc b{font-size:44px;display:block}.sc small{font-size:20px}
+.side{position:absolute;top:calc(78px + env(safe-area-inset-top,0px));left:12px;display:flex;flex-direction:column;gap:12px;z-index:35;transform:translateX(-160%);transition:transform .3s cubic-bezier(.2,1.2,.4,1)}
+.side.open{transform:none}
+.sb{width:54px;height:54px;font-size:13px}.sb.on{background:#fff;transform:scale(1.12)}
+.quad{flex:1;display:grid;grid-template:1fr 1fr/1fr 1fr;position:relative}
+.cell{display:grid;place-items:center;font-size:clamp(64px,22vw,130px)}
+.cell:active{filter:brightness(.92)}
+.mid{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:20;text-align:center;pointer-events:none;width:92%;font-size:clamp(34px,10vw,60px);line-height:1.05}
+.stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:84px 20px 56px}
+.pic{font-size:clamp(90px,34vw,170px)}
+.opts{display:flex;flex-direction:column;gap:11px;width:min(100%,420px)}
+.opt{background:#fff;color:var(--ink);border:4px solid var(--ink);border-radius:22px 18px 22px 20px;padding:12px;font-size:clamp(22px,6vw,30px);font-weight:700;box-shadow:0 6px 0 var(--ink)}
+.opt:active{transform:translateY(3px);box-shadow:0 2px 0 var(--ink)}
+.slots{display:flex;flex-wrap:wrap;gap:8px 12px;justify-content:center;max-width:380px;min-height:44px}
+.slot{width:28px;height:36px;display:grid;place-items:center;font-size:30px;font-weight:700;border-bottom:5px solid var(--ink)}
+.slot.e{border:0;background:var(--ink);width:12px;height:12px;border-radius:50%;margin:12px 8px}
+.tiles{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;max-width:380px}
+.tile{width:50px;height:50px;border-radius:50%;border:3px solid var(--ink);font-size:25px;font-weight:700;display:grid;place-items:center;background:rgba(255,255,255,.55)}
+.tile[disabled]{opacity:.25}
+.shake{animation:sh .35s}
+@keyframes sh{25%{transform:translateX(-9px)}75%{transform:translateX(9px)}}
+.gear{position:absolute;left:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:30;font-size:14px;font-weight:700;color:var(--ink);display:flex;gap:6px;align-items:center;background:rgba(255,255,255,.45);border-radius:999px;padding:6px 12px}
+/* panel */
+.ov{position:absolute;inset:0;z-index:50;background:rgba(40,25,61,.92);display:flex;align-items:center;justify-content:center;padding:16px}
+.pn{background:var(--bg);border:4px solid var(--ink);border-radius:26px 20px 28px 22px;width:min(100%,460px);max-height:88%;overflow:auto;padding:18px;box-shadow:0 8px 0 var(--ink)}
+.pn h2{font-size:30px;margin-bottom:10px}
+.row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:2px dashed rgba(255,255,255,.25);font-size:18px;font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px;margin-top:6px}
+.ex{background:rgba(255,255,255,.12);border-radius:14px;padding:6px 2px;text-align:center;font-size:12px;font-weight:600}
+.ex span{display:block;font-size:34px}.ex.l{background:rgba(255,219,77,.3)}
+.pn .pill{margin:12px 8px 0 0;display:inline-block}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const CATS="Animals|🐶 dog,🐱 cat,🐭 mouse,🐰 rabbit,🐮 cow,🐷 pig,🐸 frog,🐔 chicken,🐴 horse,🐑 sheep,🐘 elephant,🦁 lion,🐯 tiger,🐻 bear,🐵 monkey,🦒 giraffe,🐧 penguin,🦉 owl,🐢 turtle,🐙 octopus;Food|🍞 bread,🧀 cheese,🥚 egg,🍕 pizza,🍔 burger,🍟 fries,🍦 ice_cream,🍪 cookie,🎂 cake,🍫 chocolate,🍿 popcorn,🌭 hot_dog,🥐 croissant,🍜 noodles,🍣 sushi,🥞 pancakes,🍯 honey,🥜 peanut,🥧 pie,🧇 waffle;Fruit & Veg|🍎 apple,🍌 banana,🍊 orange,🍇 grapes,🍓 strawberry,🍉 watermelon,🍋 lemon,🍑 peach,🍍 pineapple,🥕 carrot,🍅 tomato,🥔 potato,🌽 corn,🥦 broccoli,🍄 mushroom,🥒 cucumber,🧅 onion,🥑 avocado,🍆 eggplant,🌶️ chili;Vehicles|🚗 car,🚌 bus,🚲 bicycle,✈️ airplane,🚂 train,🚢 ship,🚁 helicopter,🛴 scooter,🚀 rocket,🚑 ambulance,🚒 fire_truck,🚜 tractor,🏍️ motorcycle,🚕 taxi,🛶 canoe,⛵ sailboat,🚓 police_car,🚚 truck,🛹 skateboard,🚡 cable_car;Nature|🌳 tree,🌸 flower,🌹 rose,🌵 cactus,🍁 leaf,🌊 wave,🌋 volcano,⛰️ mountain,🏝️ island,🌙 moon,⭐ star,☀️ sun,🌍 earth,🔥 fire,💧 drop,❄️ snowflake,🌈 rainbow,🌻 sunflower,🐚 shell,🪨 rock;Objects|🔑 key,📖 book,✏️ pencil,📱 phone,💻 laptop,⏰ clock,🎁 gift,🔦 flashlight,🧲 magnet,🔔 bell,💡 bulb,🎈 balloon,✂️ scissors,📷 camera,☂️ umbrella,🧭 compass,🪞 mirror,🕯️ candle,📦 box,🔒 lock;Clothes|👕 shirt,👖 jeans,👗 dress,🧦 socks,👟 sneaker,🧢 cap,🧣 scarf,🧤 gloves,👓 glasses,👜 handbag,👔 tie,🥾 boot,👒 sun_hat,🩳 shorts,👙 bikini,💍 ring,🎩 top_hat,⛑️ helmet,🥽 goggles,🧥 coat;Body|👁️ eye,👂 ear,👃 nose,👄 mouth,🦷 tooth,👅 tongue,🖐️ hand,🦶 foot,🦴 bone,🧠 brain,❤️ heart,💪 muscle,🦵 leg,👶 baby,🧒 child,👨 man,👩 woman,🦻 hearing_aid,👣 footprints,🫁 lungs;Home|🛏️ bed,🛋️ sofa,🚪 door,🪟 window,🚿 shower,🚽 toilet,🪑 chair,🛁 bathtub,🍳 frying_pan,🍴 fork,🥄 spoon,🔪 knife,🥛 glass,☕ coffee_cup,🧹 broom,🧺 basket,🪴 plant,📺 television,🧸 teddy_bear,🪜 ladder;Tools|🔨 hammer,🔧 wrench,🪚 saw,⚙️ gear,🧰 toolbox,⛏️ pickaxe,🪓 axe,🔩 screw,📏 ruler,🧪 test_tube,🔬 microscope,🔭 telescope,🧯 extinguisher,🪝 hook,⛓️ chain,🪛 screwdriver,🧵 thread,🪡 needle,🖌️ paintbrush,🎣 fishing_rod;Sports|⚽ football,🏀 basketball,🎾 tennis,🏈 rugby,🏐 volleyball,⛳ golf,🥊 boxing,🏹 archery,🎯 target,🏆 trophy,🥇 medal,⛸️ skating,🎿 ski,🏊 swimming,🚴 cycling,🧗 climbing,🤿 diving,🏓 ping_pong,🎳 bowling,🪁 kite;Music & Fun|🎸 guitar,🎹 piano,🥁 drum,🎺 trumpet,🎻 violin,🎷 saxophone,🎤 microphone,🎧 headphones,📻 radio,🎵 note,🪗 accordion,🔊 speaker,🎬 movie,🎭 theatre,🎨 palette,🎪 circus,🎠 carousel,🎢 rollercoaster,🎰 slot_machine,🎮 video_game;Weather & Sky|☁️ cloud,🌧️ rain,⛈️ thunderstorm,🌪️ tornado,🌫️ fog,💨 wind,🌡️ thermometer,⛄ snowman,🌤️ sunshine,⚡ lightning,🧊 ice,💦 splash,🌀 cyclone,🌅 sunrise,🌃 night,🌌 galaxy,🌠 shooting_star,☄️ comet,🌑 new_moon,🌝 full_moon;Places|🏠 house,🏫 school,🏥 hospital,🏰 castle,⛪ church,🏢 office,🏪 shop,🏨 hotel,🏭 factory,🌉 bridge,🗼 tower,🗽 statue,⛺ tent,🏟️ stadium,🕌 mosque,🏦 bank,🚉 station,⛽ petrol_station,🛖 hut,🗿 monument;Actions|🏃 run,🚶 walk,💤 sleep,😂 laugh,😭 cry,🍽️ eat,🥤 drink,✍️ write,📚 read,🎶 sing,💃 dance,🤝 shake_hands,👏 clap,🙏 pray,🤔 think,😡 angry,😴 tired,🤗 hug,😘 kiss,🙋 ask";
+const W=CATS.split(';').flatMap(c=>{const[n,l]=c.split('|');return l.split(',').map((e,i)=>{const p=e.indexOf(' ');return{e:e.slice(0,p),w:e.slice(p+1).replace(/_/g,' '),c:n,l:i<8?'A1':i<13?'A2':i<17?'B1':'B2'}})});
+const PAL=["#89c4e2","#aed581","#fff59d","#d7ccc8","#f48fb1","#ce93d8","#80deea","#ffcc80"];
+const MODES={quad:'A.B<br>C.D',see:'A…',listen:'▶',spell:'C R<br>X',build:'🔀'};
+const KEY='worditoo.v1';
+let S={score:0,best:0,streak:0,bestStreak:0,right:0,total:0,learned:{},mode:'quad',accent:'en-US'};
+try{Object.assign(S,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+let view='home',side=false,panel=null,cur,last,opts=[],locked=false,bg='',missed=false,fill=0,tiles=[];
+const $=s=>document.querySelector(s),sh=a=>[...a].sort(()=>Math.random()-.5);
+
+function speak(t){
+  if(!('speechSynthesis' in window))return;
+  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang=S.accent;u.rate=.85;
+    const v=speechSynthesis.getVoices().find(v=>v.lang.replace('_','-')===S.accent);if(v)u.voice=v;speechSynthesis.speak(u)}catch(e){}
+}
+function mut(w){
+  for(let k=0;k<30;k++){
+    const a=w.split(''),i=1+Math.floor(Math.random()*(a.length-1)),r=Math.random();
+    if(r<.3)[a[i-1],a[i]]=[a[i],a[i-1]];
+    else if(r<.55)a.splice(i,0,a[i]);
+    else if(r<.8){const v='aeiou';a[i]=v[Math.floor(Math.random()*5)]}
+    else a.splice(i,1);
+    const m=a.join('');if(m!==w&&m.trim()&&!m.includes('  '))return m;
+  }return w+'e';
+}
+function next(){
+  do cur=W[Math.floor(Math.random()*W.length)];while(cur===last);
+  last=cur;locked=false;missed=false;fill=0;
+  const d=sh(W.filter(x=>x!==cur)).slice(0,3);
+  if(S.mode==='spell'){const s=new Set([cur.w]);while(s.size<4)s.add(mut(cur.w));opts=sh([...s])}
+  else opts=sh([cur,...d]);
+  const L=cur.w.replace(/ /g,'').split('');
+  tiles=sh(L.map((ch,id)=>({ch,id,used:false})));
+  bg=PAL[Math.floor(Math.random()*PAL.length)];
+  render();
+  if(S.mode==='listen'||S.mode==='spell')setTimeout(()=>speak(cur.w),250);
+}
+function rec(ok){
+  S.total++;
+  if(ok){S.right++;S.score++;S.streak++;S.learned[cur.w]=(S.learned[cur.w]||0)+1;S.best=Math.max(S.best,S.score);S.bestStreak=Math.max(S.bestStreak,S.streak)}
+  else S.streak=0;
+  save();
+}
+function flash(ok){const g=$('.game');if(g)g.classList.add(ok?'ok':'no')}
+function win(){locked=true;flash(true);speak(cur.w);setTimeout(next,1000)}
+function pick(i){
+  if(locked)return;
+  const o=opts[i],ok=S.mode==='spell'?o===cur.w:o===cur;
+  if(ok){rec(true);win()}
+  else{rec(false);flash(false);const el=document.querySelectorAll('[data-o]')[i];
+    if(el)el.classList.add('shake');locked=true;
+    setTimeout(()=>{const g=$('.game');g&&g.classList.remove('no');el&&el.classList.remove('shake');locked=false;hud()},450)}
+  hud();
+}
+function tile(i){
+  if(locked)return;const t=tiles[i];if(t.used)return;
+  const target=cur.w.replace(/ /g,'')[fill];
+  if(t.ch===target){t.used=true;fill++;if(fill===tiles.length){if(!missed)rec(true);win()}else render()}
+  else{if(!missed){missed=true;rec(false)}flash(false);
+    const el=document.querySelectorAll('.tile')[i];el.classList.add('shake');
+    setTimeout(()=>{const g=$('.game');g&&g.classList.remove('no');el.classList.remove('shake')},400);hud()}
+}
+function hud(){
+  const s=$('.sc');if(s)s.innerHTML=`<b>${S.score}</b><small>✓ ${S.total?Math.round(S.right/S.total*100):0}%</small>`;
+}
+function setMode(m){S.mode=m;side=false;save();S.score=S.score;next()}
+function start(){view='game';S.score=0;S.streak=0;next()}
+function openPanel(p){panel=p;render()}
+function reset(){if(confirm('Reset all progress?')){S={score:0,best:0,streak:0,bestStreak:0,right:0,total:0,learned:{},mode:'quad',accent:S.accent};save();panel=null;view='home';render()}}
+function render(){
+  const app=$('#app');
+  if(view==='home'){
+    app.innerHTML=`<div class="home"><svg viewBox="0 0 100 100"><path d="M18 84Q50 4 82 84Z" fill="#ffdb4d" stroke="#28193d" stroke-width="6" stroke-linejoin="round"/><circle cx="39" cy="55" r="6" fill="#28193d"/><circle cx="61" cy="55" r="6" fill="#28193d"/><path d="M40 70Q50 80 60 70" stroke="#28193d" stroke-width="5" fill="none" stroke-linecap="round"/></svg>
+    <h1 class="logo st">WOR<br>DI<br>TOO</h1><p class="sub st">Play and learn</p><p class="tag">${W.length} words, English language, 5 games</p>
+    <div class="pills"><button class="pill" onclick="openPanel('hs')">High scores</button><button class="pill" onclick="openPanel('stats')">Statistics</button><button class="pill" onclick="openPanel('ex')">Explorer</button></div>
+    <button class="play" onclick="start()">Play</button></div>${panelHtml()}`;return;
+  }
+  let body;
+  if(S.mode==='quad')body=`<div class="quad">${opts.map((o,i)=>`<button class="cell" data-o style="background:${PAL[(PAL.indexOf(bg)+i*3)%8]}" onclick="pick(${i})"><span class="art">${o.e}</span></button>`).join('')}<div class="mid st">${cur.w}</div></div>`;
+  else if(S.mode==='listen')body=`<div class="quad">${opts.map((o,i)=>`<button class="cell" data-o style="background:${PAL[(PAL.indexOf(bg)+i*3)%8]}" onclick="pick(${i})"><span class="art">${o.e}</span></button>`).join('')}<button class="mid pill" style="pointer-events:auto;width:auto;font-size:28px" onclick="speak(cur.w)">🔊</button></div>`;
+  else if(S.mode==='see')body=`<div class="stage" style="background:${bg}"><div class="pic art">${cur.e}</div><div class="opts">${opts.map((o,i)=>`<button class="opt" data-o onclick="pick(${i})">${o.w}</button>`).join('')}</div></div>`;
+  else if(S.mode==='spell')body=`<div class="stage" style="background:${bg}"><button class="pill" style="color:var(--ink);background:#fff" onclick="speak(cur.w)">🔊 Listen again</button><div class="opts">${opts.map((o,i)=>`<button class="opt" data-o onclick="pick(${i})">${o}</button>`).join('')}</div></div>`;
+  else{
+    let k=0;const slots=cur.w.split('').map(c=>c===' '?'<span class="slot e"></span>':`<span class="slot">${k++<fill?cur.w.replace(/ /g,'')[k-1]:''}</span>`).join('');
+    body=`<div class="stage" style="background:${bg}"><div class="pic art">${cur.e}</div><div class="slots">${slots}</div><div class="tiles">${tiles.map((t,i)=>`<button class="tile" ${t.used?'disabled':''} onclick="tile(${i})">${t.ch}</button>`).join('')}</div></div>`;
+  }
+  const solid=['quad','listen'].includes(S.mode)?'':'';
+  app.innerHTML=`<div class="game" style="background:${bg}">
+    <div class="hud"><button class="badge" aria-label="Change game" onclick="side=!side;render()">${MODES[S.mode]}</button><div class="sc"></div></div>
+    <div class="side ${side?'open':''}">${Object.keys(MODES).map(m=>`<button class="sb ${S.mode===m?'on':''}" aria-label="${m}" onclick="setMode('${m}')">${MODES[m]}</button>`).join('')}</div>
+    ${body}
+    <button class="gear" onclick="openPanel('set')">⚙ Settings</button></div>${panelHtml()}`;
+  hud();
+}
+function panelHtml(){
+  if(!panel)return'';
+  const acc=S.total?Math.round(S.right/S.total*100):0,lv=n=>W.filter(w=>w.l===n&&S.learned[w.w]>=3).length;
+  const close=`<button class="pill" onclick="panel=null;render()">Close</button>`;
+  let h='';
+  if(panel==='hs')h=`<h2 class="st">High scores</h2><div class="row"><span>Best score</span><b>${S.best}</b></div><div class="row"><span>Best streak</span><b>${S.bestStreak}</b></div><div class="row"><span>Current streak</span><b>${S.streak}</b></div>`;
+  else if(panel==='stats')h=`<h2 class="st">Statistics</h2><div class="row"><span>Answers</span><b>${S.total}</b></div><div class="row"><span>Accuracy</span><b>${acc}%</b></div><div class="row"><span>Words learned (3 ✓)</span><b>${Object.values(S.learned).filter(n=>n>=3).length}/${W.length}</b></div>${['A1','A2','B1','B2'].map(n=>`<div class="row"><span>Level ${n}</span><b>${lv(n)}/${W.filter(w=>w.l===n).length}</b></div>`).join('')}`;
+  else if(panel==='ex')h=`<h2 class="st">Explorer</h2><p style="font-size:14px">Tap a word to hear it. Yellow = learned.</p>${CATS.split(';').map(c=>{const n=c.split('|')[0];return`<h3 style="margin-top:12px">${n}</h3><div class="grid">${W.filter(w=>w.c===n).map(w=>`<button class="ex ${S.learned[w.w]>=3?'l':''}" onclick="speak('${w.w}')"><span>${w.e}</span>${w.w}<br><small>${w.l}</small></button>`).join('')}</div>`}).join('')}`;
+  else h=`<h2 class="st">Settings</h2><div class="row"><span>Voice accent</span></div><button class="pill" onclick="S.accent='en-US';save();speak('hello');panelRe()">${S.accent==='en-US'?'✓ ':''}US</button><button class="pill" onclick="S.accent='en-GB';save();speak('hello');panelRe()">${S.accent==='en-GB'?'✓ ':''}UK</button><br><button class="pill" onclick="reset()">Reset progress</button><button class="pill" onclick="panel=null;view='home';render()">Home</button>`;
+  return`<div class="ov" onclick="if(event.target===this){panel=null;render()}"><div class="pn">${h}<br>${close}</div></div>`;
+}
+function panelRe(){const o=$('.ov');if(o)o.outerHTML=panelHtml()}
+if('speechSynthesis' in window)speechSynthesis.onvoiceschanged=()=>{};
+render();
+</script>
+</body>
+</html>
